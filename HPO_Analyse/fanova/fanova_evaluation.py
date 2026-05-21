@@ -26,7 +26,7 @@ HPO_KEYS = [
     "learning_rate",
     "warmup_ratio",
     "optim",
-    "batch_size_expo",
+    "batch_size",
     "max_missing_prop",
     "drop_prob",
     "lr_scheduler_type",
@@ -56,6 +56,7 @@ cursor.execute(f"""
 SELECT id, config, Utility, budget
 FROM {TABLE_NAME}
 WHERE Utility IS NOT NULL
+AND BUDGET = 5120000
 """)
 
 rows = cursor.fetchall()
@@ -78,7 +79,7 @@ for run_id, config_json, utility, budget in rows:
             "learning_rate": float(cfg["learning_rate"]),
             "warmup_ratio": float(cfg["warmup_ratio"]),
             "optim": float(optim_map[cfg["optim"]]),
-            "batch_size_expo": float(cfg["batch_size_expo"]),
+            "batch_size": float(cfg["batch_size"]),
             "max_missing_prop": float(cfg["max_missing_prop"]),
             "drop_prob": float(cfg["drop_prob"]),
             "lr_scheduler_type": float(lr_sched_map[cfg["lr_scheduler_type"]]),
@@ -111,7 +112,7 @@ cs.add([
 
     CategoricalHyperparameter("optim", ["0", "1"]),
 
-    UniformFloatHyperparameter("batch_size_expo", 1, 11),
+    UniformFloatHyperparameter("batch_size", 2, 2048),
 
     UniformFloatHyperparameter("max_missing_prop", 0.8, 1.0),
     UniformFloatHyperparameter("drop_prob", 0.0, 0.5),
@@ -139,7 +140,7 @@ f = fANOVA(
 # =========================================================
 
 
-OUTPUT_DIR = "/mnt/c/Users/juliu/Diplomarbeit/HPO_Analyse/fanova/fanova_plots"
+OUTPUT_DIR = "/mnt/c/Users/juliu/Diplomarbeit/HPO_Analyse/fanova/fanova_plots_batchsize_maxbudget"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # =========================================================
