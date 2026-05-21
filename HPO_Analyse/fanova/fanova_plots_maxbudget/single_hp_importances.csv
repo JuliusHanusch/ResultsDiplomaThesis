@@ -1,0 +1,11 @@
+hyperparameter,importance
+learning_rate,0.0014706620980440412
+warmup_ratio,0.22373580261686282
+optim,0.0
+batch_size_expo,0.12419650460557335
+max_missing_prop,0.1583442552856317
+drop_prob,0.1452160848470001
+lr_scheduler_type,0.0
+min_past_expo,0.06050296090455636
+mean_span_length,0.24739712834232444
+masking_prob,0.00013499851572210667

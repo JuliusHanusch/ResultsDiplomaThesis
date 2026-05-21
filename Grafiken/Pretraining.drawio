@@ -1,0 +1,68 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36">
+  <diagram name="Seite-1" id="k09jKSM9PkZdqLDutTx9">
+    <mxGraphModel dx="1414" dy="785" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="op9OsURzDUHoQ4FcxaC1-1" parent="1" style="shape=datastore;whiteSpace=wrap;html=1;" value="Database" vertex="1">
+          <mxGeometry height="60" width="120" x="120" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="op9OsURzDUHoQ4FcxaC1-7" edge="1" parent="1" source="Gl51_QtAu6Iev-VbQKGl-1" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="480" y="300" as="sourcePoint" />
+            <mxPoint x="440" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="op9OsURzDUHoQ4FcxaC1-8" connectable="0" parent="op9OsURzDUHoQ4FcxaC1-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1448" y="3" as="geometry">
+            <mxPoint x="6" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Gl51_QtAu6Iev-VbQKGl-6" connectable="0" parent="op9OsURzDUHoQ4FcxaC1-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" value="2. Safe Model" vertex="1">
+          <mxGeometry relative="1" x="-0.15" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="op9OsURzDUHoQ4FcxaC1-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Evaluation of pretrained Model" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="op9OsURzDUHoQ4FcxaC1-16" edge="1" parent="1" source="OuFdSApjQaP-M548wuGE-1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="Gl51_QtAu6Iev-VbQKGl-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="230" y="390" as="sourcePoint" />
+            <mxPoint x="290" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Gl51_QtAu6Iev-VbQKGl-4" connectable="0" parent="op9OsURzDUHoQ4FcxaC1-16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" value="1. SMAC Selects&lt;br&gt;Configuration" vertex="1">
+          <mxGeometry relative="1" x="-0.0909" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="op9OsURzDUHoQ4FcxaC1-18" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Pretraining&lt;/h1&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="240" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="OuFdSApjQaP-M548wuGE-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Search Space" vertex="1">
+          <mxGeometry height="40" width="120" x="120" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="Gl51_QtAu6Iev-VbQKGl-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Pretraining of selected Config" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="Gl51_QtAu6Iev-VbQKGl-14" edge="1" parent="1" source="op9OsURzDUHoQ4FcxaC1-13" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="op9OsURzDUHoQ4FcxaC1-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="300" y="440" as="sourcePoint" />
+            <mxPoint x="300" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Gl51_QtAu6Iev-VbQKGl-15" connectable="0" parent="Gl51_QtAu6Iev-VbQKGl-14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1448" y="3" as="geometry">
+            <mxPoint x="6" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Gl51_QtAu6Iev-VbQKGl-16" connectable="0" parent="Gl51_QtAu6Iev-VbQKGl-14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" value="3. Store Results&lt;div&gt;in Database&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.15" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
