@@ -70,10 +70,7 @@ for run_id, config_json, util, budget in rows:
             "masking_prob": float(cfg["masking_prob"]),
         })
 
-        # =====================================================
-        # IMPORTANT FIX:
         # convert utility -> performance (higher = better)
-        # =====================================================
         utility.append(-float(util))
 
     except KeyError as e:
@@ -88,25 +85,31 @@ print("Target shape:", y.shape)
 assert len(df) == len(y)
 
 # =========================================================
-# CORRELATION ANALYSIS (CORRECTED)
+# RANK-BASED PERFORMANCE (KEY FIX FOR THESIS)
+# =========================================================
+
+performance = pd.Series(y).rank(method="average").values
+
+# =========================================================
+# CORRELATION ANALYSIS
 # =========================================================
 
 results = []
 
-print("\n=== Corrected Correlation Analysis (higher = better) ===\n")
+print("\n=== Correlation Analysis (Rank-based performance) ===\n")
 
 for col in df.columns:
 
     x = df[col].values
 
-    s_corr, s_p = spearmanr(x, y)
-    p_corr, p_p = pearsonr(x, y)
+    s_corr, s_p = spearmanr(x, performance)
+    p_corr, p_p = pearsonr(x, performance)
 
     results.append({
         "hyperparameter": col,
         "spearman_corr": s_corr,
-        "spearman_p": s_p,
         "pearson_corr": p_corr,
+        "spearman_p": s_p,
         "pearson_p": p_p,
         "abs_spearman": abs(s_corr)
     })
@@ -119,47 +122,99 @@ for col in df.columns:
 
 results_df = pd.DataFrame(results)
 
-# =========================================================
-# RANKING (MOST IMPORTANT FIRST)
-# =========================================================
+# rank hyperparameters
+results_df = results_df.sort_values("abs_spearman", ascending=False)
 
-results_df = results_df.sort_values(
-    "abs_spearman",
-    ascending=False
-)
-
-print("\n=== RANKED IMPORTANCE (corrected) ===\n")
+print("\n=== RANKED IMPORTANCE ===\n")
 print(results_df[["hyperparameter", "spearman_corr", "abs_spearman"]])
 
-# =========================================================
-# SAVE
-# =========================================================
-
-out_file = os.path.join(OUTPUT_DIR, "hyperparameter_ranking_corrected.csv")
-results_df.to_csv(out_file, index=False)
-
-print("\nSaved to:", out_file)
+# save table
+results_df.to_csv(os.path.join(OUTPUT_DIR, "ranking.csv"), index=False)
 
 # =========================================================
-# PLOT
+# PLOTS DIRECTORY
+# =========================================================
+
+PLOT_DIR = os.path.join(OUTPUT_DIR, "plots")
+os.makedirs(PLOT_DIR, exist_ok=True)
+
+# =========================================================
+# 1. GLOBAL RANKING PLOT
 # =========================================================
 
 plt.figure(figsize=(10, 5))
 
-plt.bar(
-    results_df["hyperparameter"],
-    results_df["spearman_corr"]
+sorted_df = results_df.sort_values("spearman_corr", ascending=True)
+
+plt.barh(
+    sorted_df["hyperparameter"],
+    sorted_df["spearman_corr"]
 )
 
-plt.axhline(0, color="black", linewidth=1)
+plt.axvline(0, color="black", linewidth=1)
 
-plt.xticks(rotation=45, ha="right")
-plt.ylabel("Spearman correlation (higher = better performance)")
-plt.title("Hyperparameter Importance (Corrected Objective Direction)")
+plt.xlabel("Spearman correlation")
+plt.title("Hyperparameter Importance Ranking (Rank-based)")
 
 plt.tight_layout()
 
-plot_path = os.path.join(OUTPUT_DIR, "correlation_plot_corrected.png")
-plt.savefig(plot_path, dpi=200)
+plt.savefig(os.path.join(PLOT_DIR, "01_ranking.png"), dpi=300)
+plt.close()
 
-print("Plot saved to:", plot_path)
+print("Saved ranking plot")
+
+# =========================================================
+# 2. MAIN EFFECT: mean_span_length
+# =========================================================
+
+hp = "mean_span_length"
+
+plt.figure(figsize=(6,4))
+plt.scatter(df[hp], performance)
+
+z = np.polyfit(df[hp], performance, 1)
+p = np.poly1d(z)
+
+x_sorted = np.sort(df[hp])
+plt.plot(x_sorted, p(x_sorted), linestyle="--")
+
+plt.xlabel(hp)
+plt.ylabel("Performance Rank")
+plt.title(f"{hp} vs Performance Rank")
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(PLOT_DIR, "02_mean_span_length.png"), dpi=300)
+plt.close()
+
+print("Saved mean_span_length plot")
+
+# =========================================================
+# 3. TOP 3 HYPERPARAMETERS
+# =========================================================
+
+top_hps = ["mean_span_length", "learning_rate", "warmup_ratio"]
+
+for hp in top_hps:
+
+    plt.figure(figsize=(6,4))
+    plt.scatter(df[hp], performance)
+
+    z = np.polyfit(df[hp], performance, 1)
+    p = np.poly1d(z)
+
+    x_sorted = np.sort(df[hp])
+    plt.plot(x_sorted, p(x_sorted), linestyle="--")
+
+    plt.xlabel(hp)
+    plt.ylabel("Performance Rank")
+    plt.title(f"{hp} vs Performance Rank")
+
+    plt.tight_layout()
+
+    plt.savefig(os.path.join(PLOT_DIR, f"03_{hp}.png"), dpi=300)
+    plt.close()
+
+    print(f"Saved {hp} plot")
+
+print("\nAll plots saved to:", PLOT_DIR)
