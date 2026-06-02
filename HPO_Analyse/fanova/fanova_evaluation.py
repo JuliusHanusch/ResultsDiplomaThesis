@@ -26,7 +26,7 @@ HPO_KEYS = [
     "learning_rate",
     "warmup_ratio",
     "optim",
-    "batch_size",
+    "batch_size_expo",
     "max_missing_prop",
     "drop_prob",
     "lr_scheduler_type",
@@ -79,7 +79,7 @@ for run_id, config_json, utility, budget in rows:
             "learning_rate": float(cfg["learning_rate"]),
             "warmup_ratio": float(cfg["warmup_ratio"]),
             "optim": float(optim_map[cfg["optim"]]),
-            "batch_size": float(cfg["batch_size"]),
+            "batch_size_expo": float(cfg["batch_size_expo"]),
             "max_missing_prop": float(cfg["max_missing_prop"]),
             "drop_prob": float(cfg["drop_prob"]),
             "lr_scheduler_type": float(lr_sched_map[cfg["lr_scheduler_type"]]),
@@ -112,7 +112,7 @@ cs.add([
 
     CategoricalHyperparameter("optim", ["0", "1"]),
 
-    UniformFloatHyperparameter("batch_size", 2, 2048),
+    UniformFloatHyperparameter("batch_size_expo", 1, 11),
 
     UniformFloatHyperparameter("max_missing_prop", 0.8, 1.0),
     UniformFloatHyperparameter("drop_prob", 0.0, 0.5),
@@ -125,89 +125,102 @@ cs.add([
     UniformFloatHyperparameter("masking_prob", 0.1, 0.3),
 ])
 
-# =========================================================
-# fANOVA (PANDAS MODE)
-# =========================================================
-
-f = fANOVA(
-    X=df,
-    Y=Y,
-    config_space=cs
-)
-
-# =========================================================
-# IMPORTANCE
-# =========================================================
-
-
-OUTPUT_DIR = "/mnt/c/Users/juliu/Diplomarbeit/HPO_Analyse/fanova/fanova_plots_batchsize_maxbudget"
+OUTPUT_DIR = "/mnt/c/Users/juliu/Diplomarbeit/HPO_Analyse/fanova/fanova_plots_30Runs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# =========================================================
-# SINGLE HP IMPORTANCES
-# =========================================================
 
-print("\n=== Single Hyperparameter Importances ===\n")
+N_RUNS = 30
 
-importance_rows = []
+all_importances = []
 
-for hp in df.columns:
+for run in range(N_RUNS):
 
-    res = f.quantify_importance((hp,))
-    importance = res[(hp,)]['individual importance']
+    print(f"Running fANOVA {run+1}/{N_RUNS}")
 
-    print(f"{hp:25s}: {importance:.6f}")
+    f = fANOVA(
+        X=df,
+        Y=Y,
+        config_space=cs,
+    )
 
-    importance_rows.append({
-        "hyperparameter": hp,
-        "importance": importance
-    })
+    row = {}
 
-importance_df = pd.DataFrame(importance_rows)
+    for hp in df.columns:
+        res = f.quantify_importance((hp,))
+        row[hp] = res[(hp,)]['individual importance']
 
-importance_df.to_csv(
-    os.path.join(OUTPUT_DIR, "single_hp_importances.csv"),
-    index=False
+    all_importances.append(row)
+
+importance_df = pd.DataFrame(all_importances)
+
+summary = pd.DataFrame({
+    "mean_importance": importance_df.mean(),
+    "std_importance": importance_df.std(),
+    "min_importance": importance_df.min(),
+    "max_importance": importance_df.max(),
+})
+
+summary = summary.sort_values(
+    "mean_importance",
+    ascending=False
+)
+
+print(summary)
+
+summary.to_csv(
+    os.path.join(OUTPUT_DIR, "importance_stability.csv")
 )
 
 # =========================================================
 # PAIRWISE INTERACTIONS
 # =========================================================
 
-print("\n=== Pairwise Interactions ===\n")
+from itertools import combinations
 
-pairs = f.get_most_important_pairwise_marginals(n=10)
+pair_results = []
 
-pair_rows = []
+for run in range(N_RUNS):
 
-for p in pairs:
+    f = fANOVA(
+        X=df,
+        Y=Y,
+        config_space=cs,
+    )
 
-    print(p)
+    row = {}
 
-    pair_rows.append({
-        "hp1": p[0],
-        "hp2": p[1]
-    })
+    for hp1, hp2 in combinations(df.columns, 2):
 
-pairs_df = pd.DataFrame(pair_rows)
+        res = f.quantify_importance((hp1, hp2))
 
-pairs_df.to_csv(
-    os.path.join(OUTPUT_DIR, "pairwise_interactions.csv"),
-    index=False
+        interaction = res[(hp1, hp2)]["individual importance"]
+
+        row[f"{hp1}__{hp2}"] = interaction
+
+    pair_results.append(row)
+
+pair_df = pd.DataFrame(pair_results)
+
+
+summary = pd.DataFrame({
+    "mean_importance": pair_df.mean(),
+    "std_importance": pair_df.std(),
+    "min_importance": pair_df.min(),
+    "max_importance": pair_df.max()
+})
+
+summary["cv"] = (
+    summary["std_importance"] /
+    summary["mean_importance"].replace(0, np.nan)
 )
 
-print("\nSaved CSV files to:", OUTPUT_DIR)
-
-# =========================================================
-# VISUALIZATION
-# =========================================================
-
-
-
-vis = fanova.visualizer.Visualizer(
-    f,
-    cs,
-    OUTPUT_DIR
+summary = summary.sort_values(
+    "mean_importance",
+    ascending=False
 )
 
-vis.create_all_plots(OUTPUT_DIR)
+summary.to_csv(
+    os.path.join(OUTPUT_DIR, "pairwise_interaction_summary.csv")
+)
+
+print(summary.head(20))
