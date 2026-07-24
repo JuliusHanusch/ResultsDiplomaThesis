@@ -1,0 +1,2 @@
+dataset,chronos_rmse,chronos_mae,mean_rmse,mean_mae,last_rmse,last_mae,ridge_rmse,ridge_mae
+/content/CodeDiplomaThesis/data/finetuning/TSER/PPGDalia/test.arrow,20.161767808627786,15.26577248167985,90.032745,87.09274,133.49982,103.77343,23.948706,20.033625

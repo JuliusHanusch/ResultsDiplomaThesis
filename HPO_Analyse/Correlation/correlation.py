@@ -60,11 +60,9 @@ for run_id, config_json, util, budget in rows:
         data.append({
             "learning_rate": float(cfg["learning_rate"]),
             "warmup_ratio": float(cfg["warmup_ratio"]),
-            "optim": float(optim_map[cfg["optim"]]),
             "batch_size_expo": float(cfg["batch_size_expo"]),
             "max_missing_prop": float(cfg["max_missing_prop"]),
             "drop_prob": float(cfg["drop_prob"]),
-            "lr_scheduler_type": float(lr_sched_map[cfg["lr_scheduler_type"]]),
             "min_past_expo": float(cfg["min_past_expo"]),
             "mean_span_length": float(cfg["mean_span_length"]),
             "masking_prob": float(cfg["masking_prob"]),
@@ -189,32 +187,107 @@ plt.close()
 
 print("Saved mean_span_length plot")
 
+from matplotlib.backends.backend_pdf import PdfPages
+
 # =========================================================
-# 3. TOP 3 HYPERPARAMETERS
+# 3. TOP 3 HYPERPARAMETERS IN ONE FIGURE
 # =========================================================
 
 top_hps = ["mean_span_length", "learning_rate", "warmup_ratio"]
 
-for hp in top_hps:
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
-    plt.figure(figsize=(6,4))
-    plt.scatter(df[hp], performance)
+for ax, hp in zip(axes, top_hps):
 
-    z = np.polyfit(df[hp], performance, 1)
-    p = np.poly1d(z)
+    ax.scatter(df[hp], performance, alpha=0.7)
 
-    x_sorted = np.sort(df[hp])
-    plt.plot(x_sorted, p(x_sorted), linestyle="--")
+    try:
+        z = np.polyfit(df[hp], performance, 1)
+        p = np.poly1d(z)
 
-    plt.xlabel(hp)
-    plt.ylabel("Performance Rank")
-    plt.title(f"{hp} vs Performance Rank")
+        x_sorted = np.sort(df[hp])
 
-    plt.tight_layout()
+        ax.plot(
+            x_sorted,
+            p(x_sorted),
+            linestyle="--",
+            linewidth=2
+        )
 
-    plt.savefig(os.path.join(PLOT_DIR, f"03_{hp}.png"), dpi=300)
-    plt.close()
+    except Exception as e:
+        print(f"Could not fit line for {hp}: {e}")
 
-    print(f"Saved {hp} plot")
+    ax.set_xlabel(hp)
+    ax.set_ylabel("Performance Rank")
+    ax.set_title(f"{hp}")
 
-print("\nAll plots saved to:", PLOT_DIR)
+fig.suptitle(
+    "Top 3 Hyperparameters vs Performance Rank",
+    fontsize=16
+)
+
+plt.tight_layout()
+
+combined_plot = os.path.join(
+    PLOT_DIR,
+    "03_top3_hyperparameters.png"
+)
+
+plt.savefig(
+    combined_plot,
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.close()
+
+print("Saved combined top-3 plot")
+
+# =========================================================
+# SAVE SAME FIGURE AS PDF
+# =========================================================
+
+pdf_path = os.path.join(
+    PLOT_DIR,
+    "03_top3_hyperparameters.pdf"
+)
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+for ax, hp in zip(axes, top_hps):
+
+    ax.scatter(df[hp], performance, alpha=0.7)
+
+    try:
+        z = np.polyfit(df[hp], performance, 1)
+        p = np.poly1d(z)
+
+        x_sorted = np.sort(df[hp])
+
+        ax.plot(
+            x_sorted,
+            p(x_sorted),
+            linestyle="--",
+            linewidth=2
+        )
+
+    except Exception:
+        pass
+
+    ax.set_xlabel(hp)
+    ax.set_ylabel("Performance Rank")
+    ax.set_title(hp)
+
+fig.suptitle(
+    "Top 3 Hyperparameters vs Performance Rank",
+    fontsize=16
+)
+
+plt.tight_layout()
+
+with PdfPages(pdf_path) as pdf:
+    pdf.savefig(fig, bbox_inches="tight")
+
+plt.close()
+
+print(f"Saved PDF: {pdf_path}")
