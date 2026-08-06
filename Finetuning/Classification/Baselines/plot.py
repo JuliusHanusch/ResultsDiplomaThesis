@@ -94,11 +94,11 @@ for dataset in datasets:
         "5-NN":
             base["5NN_accuracy"],
 
-        "RF small":
+        "Random Forest":
             base["RF_small_accuracy"],
 
-        "RF large":
-            base["RF_large_accuracy"]
+        # "RF large":
+        #     base["RF_large_accuracy"]
     })
 
 

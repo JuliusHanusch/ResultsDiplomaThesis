@@ -38,6 +38,26 @@ df_raw = pd.read_sql(
     conn
 )
 
+def get_train_inner_model(config):
+    cfg = json.loads(config)
+    return int(cfg["TrainInnerModel"])
+
+
+df_raw["TrainInnerModel"] = df_raw["config"].apply(
+    get_train_inner_model
+)
+
+
+df_raw = df_raw[
+    df_raw["TrainInnerModel"] == 1
+].copy()
+
+
+print(
+    "Runs after TrainInnerModel=True filter:",
+    len(df_raw)
+)
+
 print(df_raw.head())
 print(df_raw.columns)
 
@@ -87,11 +107,11 @@ def prepare_dataset(df):
                 float(cfg["warmup_ratio"]),
 
 
-            "TrainInnerModel":
-                float(
-                    1 if cfg["TrainInnerModel"]
-                    else 0
-                )
+            # "TrainInnerModel":
+            #     float(
+            #         1 if cfg["TrainInnerModel"]
+            #         else 0
+            #     )
         })
 
 
@@ -240,7 +260,7 @@ for dataset in datasets:
     results_df.to_csv(
         os.path.join(
             dataset_dir,
-            "spearman_ranking.csv"
+            "spearman_ranking_noinnermodel.csv"
         ),
         index=False
     )
@@ -287,7 +307,7 @@ for dataset in datasets:
     plt.savefig(
         os.path.join(
             dataset_dir,
-            "ranking.png"
+            "ranking_noinnermodel.png"
         ),
         dpi=300
     )

@@ -26,7 +26,7 @@ TABLE_NAME = "runs"
 
 OUTPUT_DIR = (
     "/mnt/c/Users/juliu/Diplomarbeit/"
-    "Finetuning/Classification/fanova/fanova_results"
+    "Finetuning/Classification/fanova/fanova_results_no_innerModel"
 )
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -56,8 +56,23 @@ columns = [
     ).fetchall()
 ]
 
+def get_train_inner_model(config):
+    cfg = json.loads(config)
+    return int(cfg["TrainInnerModel"])
 
 raw_df = pd.DataFrame(rows, columns=columns)
+raw_df["TrainInnerModel"] = raw_df["config"].apply(
+    get_train_inner_model
+)
+
+raw_df = raw_df[
+    raw_df["TrainInnerModel"] == 1
+].copy()
+
+print(
+    "Remaining runs after TrainInnerModel=True filter:",
+    len(raw_df)
+)
 
 print(raw_df.head())
 print(raw_df.columns)
@@ -102,10 +117,10 @@ cs.add([
         0.1
     ),
 
-    CategoricalHyperparameter(
-        "TrainInnerModel",
-        [0,1]
-    )
+    # CategoricalHyperparameter(
+    #     "TrainInnerModel",
+    #     [0,1]
+    # )
 ])
 
 
@@ -139,7 +154,7 @@ def prepare_dataset(df):
 
             "warmup_ratio": float(cfg["warmup_ratio"]),
 
-            "TrainInnerModel": int(cfg["TrainInnerModel"])
+            #"TrainInnerModel": int(cfg["TrainInnerModel"])
         })
 
         Y.append(float(row["accuracy"]))
@@ -183,10 +198,10 @@ for dataset in datasets:
 
     X, Y = prepare_dataset(dataset_df)
 
-    X["TrainInnerModel"] = X["TrainInnerModel"].map({
-        0: 0,
-        1: 1
-    })
+    # X["TrainInnerModel"] = X["TrainInnerModel"].map({
+    #     0: 0,
+    #     1: 1
+    # })
 
     X["effective_batch_size"] = X["effective_batch_size"].map({
         8: 0,
